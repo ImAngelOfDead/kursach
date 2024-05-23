@@ -152,6 +152,7 @@
     <ClCompile Include="imgui\TextEditor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="prepod\prepodgui.cpp" />
+    <ClCompile Include="Scheme\scheme.cpp" />
     <ClCompile Include="testloader.cpp" />
     <ClCompile Include="student\studentgui.cpp" />
   </ItemGroup>
@@ -228,6 +229,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="imgui\TextEditor.h" />
     <ClInclude Include="prepod\prepodgui.h" />
+    <ClInclude Include="Scheme\scheme.h" />
     <ClInclude Include="testloader.h" />
     <ClInclude Include="student\studentgui.h" />
     <ClInclude Include="Theme\font.h" />

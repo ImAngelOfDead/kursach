@@ -3,8 +3,6 @@
 #include <chrono>
 #include <thread>
 #include <cstdlib>
-#include "prepod/prepodgui.h"
-#include "student/studentgui.h"
 #include "main.h"
 #include "Theme/Theme.h"
 #include "imgui/imgui_impl_win32.h"
@@ -14,6 +12,10 @@
 #include <filesystem>
 #include <iostream>
 #include "UbuntuMono-B.h"
+
+#include "prepod/prepodgui.h"
+#include "student/studentgui.h"
+#include "Scheme/scheme.h"
 
 
 
@@ -178,6 +180,10 @@ int main()
                 else if (user_role == STUDENT) {
                     ShowStudentGUI();
                 }
+                else if (user_role == debug) {
+                    ShowSchemeGUI();
+                    ImGui::Text("Press 'Exit' to close scheme");
+                }
                 if (user_role == NONE) {
                     ImVec2 available = ImGui::GetContentRegionAvail();
                     float buttonWidth = 120;
@@ -203,11 +209,17 @@ int main()
 
                 ImVec2 windowSize = ImGui::GetWindowSize();
                 float buttonSize = 50.0f;
+                ImGui::SetCursorPosX(windowSize.x - buttonSize - 170);
+                ImGui::SetCursorPosY(25);
+
                 
+                if (ImGui::Button("Scheme", ImVec2(buttonSize + 10, 20))) {
+                    user_role = debug;
+                }
                 ImGui::SetCursorPosX(windowSize.x - buttonSize - 100);
                 ImGui::SetCursorPosY(25);
                 
-                // Чекбокс "Console"
+                
                 ImGui::Checkbox("Console", &showConsole);
                 if (showConsole) {
                     ShowWindow(GetConsoleWindow(), SW_SHOW); 

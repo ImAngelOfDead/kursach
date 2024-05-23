@@ -63,10 +63,7 @@ void ShowStudentGUI() {
     if (ImGui::Button("Results", ImVec2(-1, 0))) {
         currentStudentTab = STUDENT_TAB_RESULTS;
     }
-    if (ImGui::Button("Settings", ImVec2(-1, 0))) {
-        currentStudentTab = STUDENT_TAB_SETTINGS;
-    }
-
+    
     ImGui::NextColumn();
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImGui::GetWindowDrawList()->AddLine(

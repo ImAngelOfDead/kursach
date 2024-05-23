@@ -116,9 +116,6 @@ void ShowPrepodGUI() {
     if (ImGui::Button("Results", ImVec2(-1, 0))) {
         currentTab = TAB_RESULTS;
     }
-    if (ImGui::Button("Settings", ImVec2(-1, 0))) {
-        currentTab = TAB_SETTINGS;
-    }
 
     ImGui::NextColumn();
     ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -128,7 +125,7 @@ void ShowPrepodGUI() {
         ImGui::GetColorU32(ImGuiCol_Separator));
 
     if (currentTab == TAB_TESTS) {
-        ImGui::Text("Content for Tests");
+        ImGui::Text("Test List");
         if (ImGui::Button("Create Test")) {
             ImGui::OpenPopup("Create New Test");
         }
