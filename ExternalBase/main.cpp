@@ -180,10 +180,6 @@ int main()
                 else if (user_role == STUDENT) {
                     ShowStudentGUI();
                 }
-                else if (user_role == debug) {
-                    ShowSchemeGUI();
-                    ImGui::Text("Press 'Exit' to close scheme");
-                }
                 if (user_role == NONE) {
                     ImVec2 available = ImGui::GetContentRegionAvail();
                     float buttonWidth = 120;
@@ -209,13 +205,7 @@ int main()
 
                 ImVec2 windowSize = ImGui::GetWindowSize();
                 float buttonSize = 50.0f;
-                ImGui::SetCursorPosX(windowSize.x - buttonSize - 170);
-                ImGui::SetCursorPosY(25);
-
                 
-                if (ImGui::Button("Scheme", ImVec2(buttonSize + 10, 20))) {
-                    user_role = debug;
-                }
                 ImGui::SetCursorPosX(windowSize.x - buttonSize - 100);
                 ImGui::SetCursorPosY(25);
                 
