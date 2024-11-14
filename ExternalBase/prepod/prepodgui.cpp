@@ -1,7 +1,9 @@
 ﻿#include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
 #include "prepodgui.h"
-#include "../testloader.h" // Подключаем заголовочный файл
+#include "../json/json.hpp"
+#include "../testloader.h"
+using json = nlohmann::json;
 
 #include <fstream>
 #include <iostream>

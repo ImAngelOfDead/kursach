@@ -218,6 +218,8 @@
     <ClInclude Include="directx\d3dx9shape.h" />
     <ClInclude Include="directx\d3dx9tex.h" />
     <ClInclude Include="directx\d3dx9xof.h" />
+    <ClInclude Include="json\json.hpp" />
+    <ClInclude Include="json\json_fwd.hpp" />
     <ClInclude Include="main.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />

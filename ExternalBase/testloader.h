@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "D:/projects/cpp/ImGui-External-Base-main/ExternalBase/nlohmann/json.hpp"
+//#include "D:/projects/cpp/ImGui-External-Base-main/ExternalBase/nlohmann/json.hpp"
+#include "json/json.hpp"
 #include <vector>
 #include <string>
 #include <filesystem>
