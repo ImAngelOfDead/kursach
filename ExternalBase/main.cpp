@@ -1,18 +1,34 @@
-﻿#include <iostream>
+﻿#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
+#include <iostream>
 #include <chrono>
 #include <thread>
 #include <cstdlib>
 #include <filesystem>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <Windows.h>
-#include <wininet.h>
+
 #include "main.h"
 #include "Theme/Theme.h"
 #include "imgui/imgui_impl_win32.h"
 #include "UbuntuMono-B.h"
-
 #include "prepod/prepodgui.h"
 #include "student/studentgui.h"
+#include "json/json.hpp"
 #include "Scheme/scheme.h"
+
+#pragma comment(lib, "ws2_32.lib")
+
+#define SERVER_IP "213.108.23.81"
+#define SERVER_PORT 12345
+
+struct ServerStatus {
+    std::string status;
+    std::string uptime;
+};
+
+ServerStatus serverStatus = {"disconnected", "N/A"};
 
 namespace fs = std::filesystem;
 
@@ -22,6 +38,7 @@ bool reset_size = true;
 bool ncmenu = true;
 bool showConsole = false;
 bool showDebugWindow = false;
+bool showServerInfo = false;
 int tabs = 1;  // Unused, but might be used later
 Theme theme;
 
@@ -74,14 +91,71 @@ void CreateDataDirectories() {
     if (!fs::exists(debugDir)) fs::create_directory(debugDir);
 }
 
+// ------------------------- Server Logic --------------------------
+
+void sendStatistics(SOCKET sock) {
+
+    nlohmann::json statistics;
+    statistics["build"] = "Stable";
+    statistics["build_hash"] = buildHash;
+    statistics["build_date"] = buildDate;
+    statistics["build_time"] = buildTime;
+
+
+    std::string statsString = statistics.dump();
+
+
+    int result = send(sock, statsString.c_str(), statsString.size(), 0);
+    if (result == SOCKET_ERROR) {
+        std::cerr << "Failed to send statistics" << std::endl;
+    } else {
+        std::cout << "Statistics sent successfully" << std::endl;
+    }
+}
+
+void connectToServer() {
+    WSADATA wsaData;
+    SOCKET sock;
+    struct sockaddr_in serverAddr;
+
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "WinSock initialization failed!" << std::endl;
+        return;
+    }
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET) {
+        std::cerr << "Error creating socket" << std::endl;
+        WSACleanup();
+        return;
+    }
+
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(SERVER_PORT);
+    inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr);
+
+    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "Connection failed!" << std::endl;
+        closesocket(sock);
+        WSACleanup();
+        return;
+    }
+
+    std::cout << "Connected to server!" << std::endl;
+
+
+    sendStatistics(sock);
+
+    closesocket(sock);
+    WSACleanup();
+}
 // -------------------------- Main Program --------------------------
+
 
 int main() {
     CreateDataDirectories();
-
-    // Window setup
     HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(console, 1);  // Set console color
+    SetConsoleTextAttribute(console, 1); 
 
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ExternalProB1"), NULL };
     RegisterClassEx(&wc);
@@ -95,7 +169,8 @@ int main() {
 
     ShowWindow(GetConsoleWindow(), SW_HIDE);
     UpdateWindow(hwnd);
-
+    connectToServer();
+    
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -122,7 +197,7 @@ int main() {
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX9_Init(g_pd3dDevice);
 
-    // Set console title
+
     std::wstring wideConsoleTitle = std::wstring(consoleTitle.begin(), consoleTitle.end());
     SetConsoleTitle(wideConsoleTitle.c_str());
 
@@ -142,7 +217,7 @@ int main() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        // Main menu window
+
         if (ncmenu) {
             if (reset_size) {
                 ImGui::SetNextWindowSize(ImVec2(690, 450));
@@ -152,7 +227,7 @@ int main() {
             ImGui::SetNextWindowBgAlpha(1.0f);
             ImGui::Begin(window_title, &ncmenu, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-            // Role-specific UI
+
             if (user_role == TEACHER) {
                 ShowPrepodGUI();
             } else if (user_role == STUDENT) {
@@ -178,8 +253,7 @@ int main() {
                     user_role = STUDENT;
                 }
             }
-
-            // Console and Debug Window toggles
+            
             ImVec2 windowSize = ImGui::GetWindowSize();
             float buttonSize = 50.0f;
 
@@ -197,15 +271,19 @@ int main() {
             ImGui::SetCursorPosX(windowSize.x - buttonSize - 225);
             ImGui::SetCursorPosY(25);
             ImGui::Checkbox("Debug Info", &showDebugWindow);
+            
+            ImGui::SetCursorPosX(windowSize.x - buttonSize - 350);
+            ImGui::SetCursorPosY(25);
+            ImGui::Checkbox("Server Info", &showServerInfo);
+
 
             ImGui::SetCursorPosX(windowSize.x - buttonSize - 5);
             ImGui::SetCursorPosY(25);
             if (ImGui::Button("Exit", ImVec2(buttonSize, 20))) {
                 user_role = NONE;
             }
-
-            // Debug Info window
             if (showDebugWindow) {
+                
                 ImGui::Begin("Debug Window", &showDebugWindow, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
                 ImGui::Text("Build: Stable");   
                 ImGui::Text("Build Hash: %s", buildHash.c_str());
@@ -213,6 +291,17 @@ int main() {
                 ImGui::Text("Build Time: %s", buildTime);
                 ImGui::End();
             }
+            
+            if (showServerInfo)
+            {
+                
+                ImGui::Begin("Server Info", &showServerInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+                if (ImGui::Button("Send Statistics")) {
+                    connectToServer();
+                }
+                ImGui::End();
+            }
+
 
             ImGui::End();
         } else {
